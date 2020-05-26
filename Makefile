@@ -16,11 +16,12 @@ LDFLAGS = -lglib-2.0 -lpthread
 MKDIR = mkdir -p
 
 # C Source Files
-CSOURCES    = 
+CSOURCES    = gpio-utils.c
+
 
 # C++ Source Files
 CXXSOURCES = QnPacket.cpp  qn_programmer.cpp serial.cpp print.cpp QnPacket.cpp
-CXXSOURCES += timing.cpp bb_gpio.cpp helper.cpp  
+CXXSOURCES += timing.cpp helper.cpp  
 
 DEPS_H_FILE = 
 
@@ -65,6 +66,7 @@ $(OUTPUT_BINARY_DIRECTORY)/%.o: %.c $(DEPS_H_FILE) | $(BUILD_DIRECTORIES)
 
 $(OUTPUT_BINARY_DIRECTORY)/%.o: %.cpp $(DEPS_H_FILE) | $(BUILD_DIRECTORIES)
 	@$(CXX) -g -c -o $@ $< $(PKG_FLAGS) $(CXXFLAGS) $(INC_PATHS)
+
 
 ## Create build directories
 $(BUILD_DIRECTORIES):

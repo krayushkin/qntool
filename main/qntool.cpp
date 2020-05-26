@@ -6,7 +6,7 @@
 #include "drivers/bb_gpio.h"
 #include "helper/timing.h"
 #include "helper/Exception.h"
-
+#include "drivers/gpio-utils.hpp"
 #include <fstream>
 #include <iostream>
 #include <stdio.h>
@@ -17,23 +17,20 @@
 // https://learnbuildshare.wordpress.com/2013/05/29/beaglebone-black-digital-ouput/
 
 
-static unsigned qn_enable_gpio = 66;
-static unsigned qn_reset_gpio = 111;
-
-int program_qn902x(std::string &file, std::string &port)
+int program_qn902x(std::string &file, std::string &port, std::string &gpioname, std::string &resetpin)
 {
+	int reset = std::stoi(resetpin);
+
 	try {
 		QnProgrammer prog(port.c_str());
 	    prog.setup();
 
-	    pinMode(qn_enable_gpio, OUTPUT);
-		pinMode(qn_reset_gpio, OUTPUT);
 
-		digitalWrite(qn_enable_gpio, HIGH);
 
-		digitalWrite(qn_reset_gpio, HIGH);
+
+	    gpiotools_set(gpioname.c_str(), reset, 0);
 		delay_ms(100);
-		digitalWrite(qn_reset_gpio, LOW);
+		gpiotools_set(gpioname.c_str(), reset, 1);
 		delay_ms(10);
 
 	    std::cout << "Reseting qn902x..." << std::endl;
@@ -116,25 +113,30 @@ int program_qn902x(std::string &file, std::string &port)
 }
 
 struct option qn_prog_opt[] = {
-	{ "file",  required_argument,  NULL,  'f'},
-	{ "port",  required_argument,  NULL,  'p'},
-	{  NULL,   required_argument,  NULL,   0 }
+	{ "gpio",  		required_argument,  NULL,  'g'},
+	{ "resetpin",  required_argument,  NULL,  'r'},
+	{ "file",  		required_argument,  NULL,  'f'},
+	{ "port",  		required_argument,  NULL,  'p'},
+	{  NULL,   		required_argument,  NULL,   0 }
 };
 
 void usage()
 {
 	std::cout << "QnProgrammer Usage Guide" << std::endl;
-	std::cout << "QnProgrammer [ --port PORT ] [ --file FILE ]" << std::endl;
+	std::cout << "QnProgrammer [--gpio GPIO_DEVICE] [--reset_pin RESET_LINE] [ --port PORT ] [ --file FILE ]" << std::endl;
 	std::cout << "Use 'f' short option for \"file\" and 'p' short option for \"port\"" << std::endl;
+	std::cout << "Use 'g' short option for \"gpio\" and 'r' short option for \"resetpin\"" << std::endl;
 }
 
 int main(int argc, char *argv[])
 {
 	std::string filename;
 	std::string portname;
+	std::string gpioname = "gpiochip0";
+	std::string resetpin;
 
 	int opt=0;	
-	while ((opt = getopt_long(argc, argv, "+:f:p:", qn_prog_opt, NULL)) >= 0) {
+	while ((opt = getopt_long(argc, argv, "+:f:p:g:r:", qn_prog_opt, NULL)) >= 0) {
 		switch (opt) {
 		case 'f':
 		{	
@@ -148,6 +150,19 @@ int main(int argc, char *argv[])
 			std::cout << "Port of qn902x: " << portname.c_str() << std::endl;
 			break;
 		}
+		case 'g':
+		{
+			gpioname = optarg;
+			std::cout << "Name of gpio device (for qn902x reset): " << gpioname.c_str() << std::endl;
+			break;
+		}
+		case 'r':
+		{
+			resetpin = optarg;
+			std::cout << "Gpio line number for reset pin: " << resetpin.c_str() << std::endl;
+			break;
+		}
+
 		// Executes when missing argument for an option is detected!
 		case ':':
 		{
@@ -174,13 +189,13 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	if ((portname.empty()) or (filename.empty())) {
+	if ((portname.empty()) or (filename.empty()) or (resetpin.empty())) {
 		std::cerr << "Insufficient arguments" << std::endl;
 		usage();
 		return -1;
 	}
 
-	if (program_qn902x(filename, portname))
+	if (program_qn902x(filename, portname, gpioname, resetpin))
 		return -1;
 
 	return 0;

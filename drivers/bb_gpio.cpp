@@ -9,6 +9,7 @@
 
 #include <sys/stat.h>
 #include <getopt.h>
+#include "drivers/gpio-utils.hpp"
 
 #define MAX_GPIO_PATH_STRING_SIZE           128
  
@@ -68,6 +69,8 @@ void pinMode(unsigned pin, pin_mode_e mode)
 
 void digitalWrite(unsigned pin, bool value)
 {   
+	gpiotools_set("gpiochip0", pin, value);
+
     char path[MAX_GPIO_PATH_STRING_SIZE + 1];
     sprintf(path, "/sys/class/gpio/gpio%u/value", pin);
 
