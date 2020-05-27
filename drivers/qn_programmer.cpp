@@ -22,9 +22,13 @@
  */
 
 void reset_qn902x(std::string &device, unsigned line) {
-	gpiotools_set(device.c_str(), line, 0);
+	int ret = gpiotools_set(device.c_str(), line, 0);
+	if (ret < 0)
+		std :: cerr << "Failed to connect" << std :: endl;
 	delay_ms(100);
-	gpiotools_set(device.c_str(), line, 1);
+	ret = gpiotools_set(device.c_str(), line, 1);
+	if (ret < 0)
+		std :: cerr << "Failed to connect" << std :: endl;
 	delay_ms(10);
 }
 
@@ -165,7 +169,7 @@ void QnProgrammer::connect(unsigned timeout)
 			throw Exception("Qn rejected connection with bootloader");
 
 
-// HERE
+		reset_qn902x(_rst_device, _rst_line);
 	}
 
 	// Time to switch Buadrate!

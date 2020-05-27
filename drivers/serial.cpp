@@ -150,8 +150,8 @@ int Serial::begin(unsigned baud_rate)
 
     if (cfsetospeed(&setting, termios_buad))
     	return -1;
- 	if (cfsetispeed(&setting, termios_buad))
- 		return -1;
+    if (cfsetispeed(&setting, termios_buad))
+    	return -1;
 
     if (tcflush(fd, TCIOFLUSH))			  // Flush non-tramsmitted and unread data!
     	return -1;

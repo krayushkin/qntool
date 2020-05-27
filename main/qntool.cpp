@@ -27,11 +27,12 @@ int program_qn902x(std::string &file, std::string &port, std::string &gpioname, 
 
 
 
-
+	   
 
 	    std::cout << "Reseting qn902x..." << std::endl;
 	    std::cout << "Connecting to Qn902x..." <<std::endl;
-	    
+	   
+	    reset_qn902x(gpioname, reset); 
 	    prog.connect(5000);
 
 	    std::cout << "Connected to qn902x" << std::endl;
