@@ -2,7 +2,7 @@
 #include "drivers/QnPacket.h"
 #include "helper/timing.h"
 #include "helper/Exception.h"
-#include "drivers/bb_gpio.h"
+#include "drivers/gpio-utils.hpp"
 
 
 #include <iostream>
@@ -20,6 +20,15 @@
  *
  *
  */
+
+void reset_qn902x(std::string &device, unsigned line) {
+	gpiotools_set(device.c_str(), line, 0);
+	delay_ms(100);
+	gpiotools_set(device.c_str(), line, 1);
+	delay_ms(10);
+}
+
+
 
 
 void convertToBuf(uint32_t val, uint8_t *p_buf)
@@ -155,11 +164,8 @@ void QnProgrammer::connect(unsigned timeout)
 		if (c == CONFIRM_NACK)
 			throw Exception("Qn rejected connection with bootloader");
 
-		// Hard Fix!
-		digitalWrite(111, HIGH);
-		delay_ms(100);
-		digitalWrite(111, LOW);
-		delay_ms(10);
+
+// HERE
 	}
 
 	// Time to switch Buadrate!

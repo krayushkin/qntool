@@ -3,10 +3,9 @@
 #endif
 
 #include "drivers/qn_programmer.h"
-#include "drivers/bb_gpio.h"
 #include "helper/timing.h"
 #include "helper/Exception.h"
-#include "drivers/gpio-utils.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <stdio.h>
@@ -22,16 +21,13 @@ int program_qn902x(std::string &file, std::string &port, std::string &gpioname, 
 	int reset = std::stoi(resetpin);
 
 	try {
-		QnProgrammer prog(port.c_str());
+		QnProgrammer prog(port.c_str(), gpioname, reset);
 	    prog.setup();
 
 
 
 
-	    gpiotools_set(gpioname.c_str(), reset, 0);
-		delay_ms(100);
-		gpiotools_set(gpioname.c_str(), reset, 1);
-		delay_ms(10);
+
 
 	    std::cout << "Reseting qn902x..." << std::endl;
 	    std::cout << "Connecting to Qn902x..." <<std::endl;

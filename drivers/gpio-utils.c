@@ -69,7 +69,7 @@ int gpiotools_request_linehandle(const char *device_name, unsigned int *lines,
 	struct gpiohandle_request req;
 	char *chrdev_name;
 	int fd;
-	int i;
+	unsigned int i;
 	int ret;
 
 	ret = asprintf(&chrdev_name, "/dev/%s", device_name);

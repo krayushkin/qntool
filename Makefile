@@ -32,7 +32,7 @@ OBJECT_DIRECTORY        = ./bin
 OUTPUT_BINARY_DIRECTORY = $(OBJECT_DIRECTORY)
 EXE_DIRECTORY			= ./exe
 
-EXE_FILES =	 qntool pin_ctrl
+EXE_FILES =	 qntool 
 
 OBJC   = $(patsubst %,$(OUTPUT_BINARY_DIRECTORY)/%,$(OBJECTC))
 OBJCXX = $(patsubst %,$(OUTPUT_BINARY_DIRECTORY)/%,$(OBJECTCXX))
@@ -55,10 +55,6 @@ qntool: $(OBJC) $(OBJCXX) qntool.cpp | $(BUILD_DIRECTORIES)
 	@$(CXX) -g -o $@ $^ $(PKG_FLAGS) $(CXXFLAGS) $(LDFLAGS) $(INC_PATHS)
 	@echo "********************************** qntool done **********************************"
 
-
-pin_ctrl: $(OBJC) $(OBJCXX) pin_ctrl.cpp | $(BUILD_DIRECTORIES)
-	@$(CXX) -g -o $@ $^ $(PKG_FLAGS) $(CXXFLAGS) $(LDFLAGS) $(INC_PATHS)
-	@echo "********************************** pin_ctrl done **********************************"
 
 
 $(OUTPUT_BINARY_DIRECTORY)/%.o: %.c $(DEPS_H_FILE) | $(BUILD_DIRECTORIES)

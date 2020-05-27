@@ -3,7 +3,7 @@
 
 #include "helper/serial.h"
 #include <stdint.h>
-
+#include <string>
 
 #define B_C_CMD						0x33
 #define SET_BR_CMD					0x34
@@ -49,11 +49,16 @@
 #define BIN_FILE_CHUNK_SIZE			64
 
 
+
+void reset_qn902x(std::string &device, unsigned line) ;
+
 class QnProgrammer {
 private:
 	Serial _serial;
 	unsigned _baud_rate;
 	unsigned _clock;
+	unsigned _rst_line;
+	std::string _rst_device;
 
 	static uint32_t calculate_uart_register(unsigned clock, unsigned baudrate);
 
@@ -62,7 +67,7 @@ private:
 	
 public:
 
-	QnProgrammer(const char *dev) : _serial(dev) { }
+	QnProgrammer(const char *dev, const std::string& device, unsigned line) : _serial(dev), _baud_rate(0), _clock(0), _rst_line(line), _rst_device(device) {}
 	~QnProgrammer() { }
 
 	int setup(unsigned baud_rate=115200, unsigned clock=16000000);
