@@ -46,7 +46,7 @@ BUILD_DIRECTORIES := $(sort $(OBJECT_DIRECTORY) $(OUTPUT_BINARY_DIRECTORY))
 
 ## Rules start from here
 
-.PHONY: all cleanall clean cleanobj
+.PHONY: all cleanall clean cleanobj flash
 .DEFAULT_GOAL = all
 
 all: $(EXE_FILES) | $(BUILD_DIRECTORIES)
@@ -74,4 +74,5 @@ cleanall:
 	$(RM) -r $(BUILD_DIRECTORIES)
 	$(RM) -r $(EXE_FILES)
 
-
+flash:
+	./qntool --port /dev/ttyS2 --file gpio.bin --gpio gpiochip0 --resetpin 3
