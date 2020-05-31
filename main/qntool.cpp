@@ -64,7 +64,10 @@ int program_qn902x(std::string &file, std::string &port, std::string &gpioname, 
 
 	    bin_file.seekg(0, std::fstream::end);
 	    unsigned long bin_file_size = bin_file.tellg();
+	    std :: cout << "bin_file_size = " <<  bin_file_size << std :: endl;
 	    unsigned long bin_file_chunk_num = bin_file_size / BIN_FILE_CHUNK_SIZE;
+	    std :: cout << "bin_file_chunk_num  = " <<  bin_file_chunk_num << std :: endl;
+
 
 	    bin_file.seekg(0, std::fstream::beg);
 
@@ -86,10 +89,12 @@ int program_qn902x(std::string &file, std::string &port, std::string &gpioname, 
 	    if (!bin_file.good())
 	    	throw Exception("Binary File isn't good");
 
-	    bin_file.read(chunk, bin_file_size % BIN_FILE_CHUNK_SIZE);
-
-	    if (!prog.program(reinterpret_cast<uint8_t *>(chunk), bin_file_size % BIN_FILE_CHUNK_SIZE))
-	    	throw Exception("Error in programming");
+	    // if some byte left in bin file
+	    if (bin_file_size % BIN_FILE_CHUNK_SIZE != 0 ) {
+		    bin_file.read(chunk, bin_file_size % BIN_FILE_CHUNK_SIZE);
+		    if (!prog.program(reinterpret_cast<uint8_t *>(chunk), bin_file_size % BIN_FILE_CHUNK_SIZE))
+			throw Exception("Error in programming");
+	    }
 
 	    std::cout << '\r' << "[ 100% ]" << std::endl;
 	    std::cout << "Programmed Successfully" << std::endl;

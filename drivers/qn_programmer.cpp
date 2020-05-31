@@ -98,7 +98,7 @@ bool QnProgrammer::read_pkt(bool only_confirm, uint8_t *buf, unsigned len)
 	
 	block_read(&start_byte, 1);
 
-	if (start_byte == RESULT_FAILED)
+	if (start_byte == RESULT_FAILED) 
 		return false;
 	if (start_byte == RESULT_SUCCESSFULL)
 		return true;
