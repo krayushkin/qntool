@@ -9,6 +9,7 @@
 #include <string>
 #include <string.h>
 #include <stdint.h>
+#include <cstdio>
 
 // Bootloader of qn902x works in two modes:
 // 1. ISP Mode
@@ -135,7 +136,7 @@ bool QnProgrammer::read_pkt(bool only_confirm, uint8_t *buf, unsigned len)
 	if (buf == nullptr)
 		return true;
 
-	memcpy(buf, pkt, datalen);
+	memcpy(buf, pkt + DATA_OFFSET_IN_PKT, datalen);
 	return true;
 }
 
@@ -210,13 +211,20 @@ bool QnProgrammer::set_load_target(uint32_t target)
 bool QnProgrammer::get_bootloader_version()
 {
 	send_cmd(RD_BL_VER_CMD);
-	return read_pkt();
+	uint8_t data[4];
+	read_pkt(false, (uint8_t *)data, 4);
+	printf("Bootloader version: %x, %x, %x, %x\n", data[0], data[1], data[2], data[3]);
+	return true;
 }
 
 bool QnProgrammer::get_chip_id()
 {
 	send_cmd(RD_CHIP_ID_CMD);
-	return read_pkt();
+	uint8_t data[4];
+	read_pkt(false, (uint8_t *)data, 4);
+	printf("Chip id: %x, %x, %x, %x\n", data[0], data[1], data[2], data[3]);
+	return true;
+
 }
 
 bool QnProgrammer::get_flash_id()
@@ -229,6 +237,45 @@ bool QnProgrammer::program(uint8_t *data, unsigned len)
 {
 	send_cmd(PROGRAM_CMD, data, len);
 	return read_pkt(false, nullptr, 0);
+}
+
+static uint8_t nvds_data[4096];
+
+uint8_t *QnProgrammer::read_nvds()
+{
+	uint32_t offset = 0, data;
+	convertToBuf(256, (uint8_t *)&data);
+	std::cout << "Staring read nvds..." << std :: endl;
+	for (int i = 0; i < 16; i++) {
+		set_program_address(offset + 0);
+		send_cmd(RD_CMD, (uint8_t *)&data, 4);
+		read_pkt(false, nvds_data + offset, 256);
+		offset += 256;
+	}
+	return nvds_data;
+}
+
+
+
+bool QnProgrammer::erase_nvds()
+{
+	uint32_t offset = 0, data;
+	convertToBuf(256, (uint8_t *)&data);
+	std::cout << "set nvds address" << std :: endl;
+	for (int i = 0; i < 16; i++) {
+		set_program_address(offset);
+		send_cmd(RD_CMD, (uint8_t *)&data, 4);
+		read_pkt(false, nvds_data + offset, 256);
+		offset += 256;
+	}
+	uint8_t *b = nvds_data;
+	for (int i = 0;  i < 128; i++) {
+		for (int j = 0; j < 32; j++) {
+			printf("%3x ", *b++);
+		}
+		std :: cout << std :: endl; 
+	}
+	return nvds_data;
 }
 
 bool QnProgrammer::set_program_address(uint32_t address)

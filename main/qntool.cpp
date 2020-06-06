@@ -14,6 +14,72 @@
 #include <getopt.h>
 
 // https://learnbuildshare.wordpress.com/2013/05/29/beaglebone-black-digital-ouput/
+int read_info(std::string &port, std::string &gpioname, std::string &resetpin)
+{
+	int reset = std::stoi(resetpin);
+
+	try {
+		QnProgrammer prog(port.c_str(), gpioname, reset);
+	    prog.setup();
+	    std::cout << "Reseting qn902x..." << std::endl;
+	    std::cout << "Connecting to Qn902x..." <<std::endl;
+	   
+	    reset_qn902x(gpioname, reset); 
+	    prog.connect(5000);
+
+	    std::cout << "Connected to qn902x" << std::endl;
+
+
+	   prog.get_bootloader_version();
+	   prog.get_chip_id();
+	}
+
+	catch (Exception &e) {
+		std::cerr << "EXCEPTION THROWN!: MESSAGE: ";
+		std::cerr << e.what() << std::endl;
+		return -1;
+	}
+
+    return 0;
+	
+}
+
+
+int read_nvds(std::string &nvds_file, std::string &port, std::string &gpioname, std::string &resetpin)
+{
+	int reset = std::stoi(resetpin);
+
+	try {
+		QnProgrammer prog(port.c_str(), gpioname, reset);
+	    prog.setup();
+	    std::cout << "Reseting qn902x..." << std::endl;
+	    std::cout << "Connecting to Qn902x..." <<std::endl;
+	   
+	    reset_qn902x(gpioname, reset); 
+	    prog.connect(5000);
+
+	    std::cout << "Connected to qn902x" << std::endl;
+
+
+	   uint8_t *nvds = prog.read_nvds();
+	   FILE *f = fopen(nvds_file.c_str(),  "wb");
+	   if (f != NULL) {
+	   	fwrite(nvds, 1, 4096, f);
+		fclose(f);
+	   } else {
+		printf("error");
+	   }
+	}
+
+	catch (Exception &e) {
+		std::cerr << "EXCEPTION THROWN!: MESSAGE: ";
+		std::cerr << e.what() << std::endl;
+		return -1;
+	}
+
+    return 0;
+	
+}
 
 
 int program_qn902x(std::string &file, std::string &port, std::string &gpioname, std::string &resetpin)
@@ -24,11 +90,6 @@ int program_qn902x(std::string &file, std::string &port, std::string &gpioname, 
 		QnProgrammer prog(port.c_str(), gpioname, reset);
 	    prog.setup();
 
-
-
-
-	   
-
 	    std::cout << "Reseting qn902x..." << std::endl;
 	    std::cout << "Connecting to Qn902x..." <<std::endl;
 	   
@@ -36,6 +97,7 @@ int program_qn902x(std::string &file, std::string &port, std::string &gpioname, 
 	    prog.connect(5000);
 
 	    std::cout << "Connected to qn902x" << std::endl;
+
 
 	    prog.set_program_address(0x1000);
 	    
@@ -119,6 +181,8 @@ struct option qn_prog_opt[] = {
 	{ "resetpin",  required_argument,  NULL,  'r'},
 	{ "file",  		required_argument,  NULL,  'f'},
 	{ "port",  		required_argument,  NULL,  'p'},
+	{ "nvds",  		optional_argument,  NULL,  'n'},
+	{ "version",  		optional_argument,  NULL,  'v'},
 	{  NULL,   		required_argument,  NULL,   0 }
 };
 
@@ -136,9 +200,11 @@ int main(int argc, char *argv[])
 	std::string portname;
 	std::string gpioname = "gpiochip0";
 	std::string resetpin;
+	bool do_nvds = false, do_version = false;
+
 
 	int opt=0;	
-	while ((opt = getopt_long(argc, argv, "+:f:p:g:r:", qn_prog_opt, NULL)) >= 0) {
+	while ((opt = getopt_long(argc, argv, "+:f:p:g:r:n:v:", qn_prog_opt, NULL)) >= 0) {
 		switch (opt) {
 		case 'f':
 		{	
@@ -174,6 +240,18 @@ int main(int argc, char *argv[])
 
 			break;
 		}
+		case 'n': 
+		{
+			do_nvds = true;
+			break;
+
+		}
+		case 'v': 
+		{
+			do_version = true;
+			break;
+
+		}
 		// Executes when non-recognized option character is seen!
 		case '?':
 		default:
@@ -191,14 +269,24 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	if (do_version) {
+		read_info(portname, gpioname, resetpin);
+		return 0;
+	}
+
 	if ((portname.empty()) or (filename.empty()) or (resetpin.empty())) {
 		std::cerr << "Insufficient arguments" << std::endl;
 		usage();
 		return -1;
 	}
 
-	if (program_qn902x(filename, portname, gpioname, resetpin))
-		return -1;
+	if (do_nvds) {
+		if (read_nvds(filename, portname, gpioname, resetpin))
+			return -1;
+	} else {
+		if (program_qn902x(filename, portname, gpioname, resetpin))
+			return -1;
+	}
 
 	return 0;
 }

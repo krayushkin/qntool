@@ -6,12 +6,14 @@ CFLAGS = -Wall
 CXXFLAGS  = -Wall 
 CXXFLAGS += --std=c++11
 
-PKG_FLAGS = $(shell pkg-config --cflags glib-2.0)
+#PKG_FLAGS = $(shell pkg-config --cflags glib-2.0)
+PKG_FLAGS = 
 
 INC_PATHS += -I.
 INC_PATHS += -I./include/
 
-LDFLAGS = -lglib-2.0 -lpthread
+#LDFLAGS = -lglib-2.0 -lpthread
+LDFLAGS = -lpthread
 
 MKDIR = mkdir -p
 
@@ -46,7 +48,7 @@ BUILD_DIRECTORIES := $(sort $(OBJECT_DIRECTORY) $(OUTPUT_BINARY_DIRECTORY))
 
 ## Rules start from here
 
-.PHONY: all cleanall clean cleanobj flash
+.PHONY: all cleanall clean cleanobj flash nvds version
 .DEFAULT_GOAL = all
 
 all: $(EXE_FILES) | $(BUILD_DIRECTORIES)
@@ -74,5 +76,11 @@ cleanall:
 	$(RM) -r $(BUILD_DIRECTORIES)
 	$(RM) -r $(EXE_FILES)
 
-flash:
+flash: all
 	./qntool --port /dev/ttyS2 --file gpio.bin --gpio gpiochip0 --resetpin 3
+
+nvds: all
+	./qntool --port /dev/ttyS2 --file nvds.bin --gpio gpiochip0 --resetpin 3 --nvds 
+
+version: all
+	./qntool --port /dev/ttyS2 --gpio gpiochip0 --resetpin 3 --version

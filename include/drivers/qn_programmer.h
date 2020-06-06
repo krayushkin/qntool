@@ -91,6 +91,8 @@ public:
 	bool set_app_reset_addr(uint32_t address);
 
 	bool program(uint8_t *data, unsigned len);
+	uint8_t *read_nvds();
+	bool erase_nvds();
 
 };
 
