@@ -77,10 +77,12 @@ cleanall:
 	$(RM) -r $(EXE_FILES)
 
 flash: all
-	./qntool --port /dev/ttyS2 --file gpio.bin --gpio gpiochip0 --resetpin 3
+	./qntool --port /dev/ttyS2 --file gpio.bin --gpio gpiochip0 --resetpin 7
+qpps: all
+	./qntool --port /dev/ttyS2 --file qpps.bin --gpio gpiochip0 --resetpin 7
 
 nvds: all
-	./qntool --port /dev/ttyS2 --file nvds.bin --gpio gpiochip0 --resetpin 3 --nvds 
+	./qntool --port /dev/ttyS2 --file nvds.bin --gpio gpiochip0 --resetpin 7 --nvds 
 
 version: all
-	./qntool --port /dev/ttyS2 --gpio gpiochip0 --resetpin 3 --version
+	./qntool --port /dev/ttyS2 --gpio gpiochip0 --resetpin 7 --version
